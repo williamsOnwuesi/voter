@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "517272680107",
+    "project_id": "voter-867fd",
+    "storage_bucket": "voter-867fd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:517272680107:android:4d41b84d397572a2d229ee",
+        "android_client_info": {
+          "package_name": "com.example.voter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8G1ctTRZQm3rGYrkRhzCp_hZ55stAo18"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
