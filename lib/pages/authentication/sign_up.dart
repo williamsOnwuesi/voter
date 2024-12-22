@@ -5,6 +5,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:voter/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:voter/pages/services/verifyer.dart';
 
 class SignUp extends StatefulWidget {
   final VoidCallback switchToLogin;
@@ -20,6 +21,7 @@ class _SignUpState extends State<SignUp> {
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController regNoController = TextEditingController();
 
   Future signUpWithFirebase() async {
     final isValid = formKey.currentState!.validate();
@@ -29,44 +31,74 @@ class _SignUpState extends State<SignUp> {
 
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (context) {
           return const Center(child: CircularProgressIndicator());
         });
 
     var email = emailController.text;
     var password = passwordController.text;
+    var regNo = regNoController.text;
 
     Map<String, dynamic> registeredUsersData = {
       'email': email,
       "voted": false,
+      "regNo": regNo,
     };
 
-    try {
-      await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
+    //print("This user is verified");
 
-      await FirebaseFirestore.instance
-          .collection("registered_users_data")
-          .doc(email)
-          .set(registeredUsersData);
-    } on FirebaseAuthException catch (error) {
+    Future<bool> res = Verifier().checkIfRegNoIsAttached(regNo);
+
+    if (await res) {
+      print(
+          "Sorry your Reg number is already attached to another users account. please contact a NACOSS official.");
       //
-      //Print(error);
-      // Utils().showSnackBar(error.message);
-
-      var snackBar = SnackBar(
+      var snackBarError = const SnackBar(
         elevation: 0,
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.transparent,
         content: AwesomeSnackbarContent(
             title: 'Oh Snap!',
-            message: '${error.message}',
+            message:
+                "Sorry this Registration number is already attached. Please visit Naccos office.",
             contentType: ContentType.failure),
       );
-
+      //
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(snackBar);
+        ..showSnackBar(snackBarError);
+
+      //
+    } else {
+      print("This Reg number is not attached yet $res");
+      //
+      try {
+        await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
+        await FirebaseFirestore.instance
+            .collection("registered_users_data")
+            .doc(email)
+            .set(registeredUsersData);
+
+        //
+      } on FirebaseAuthException catch (error) {
+        var signUpErrorSnackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+              title: 'Oh Snap!',
+              message: '${error.message}',
+              contentType: ContentType.failure),
+        );
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(signUpErrorSnackBar);
+      }
+
+      //
     }
 
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
@@ -102,6 +134,21 @@ class _SignUpState extends State<SignUp> {
                           validator: (email) =>
                               email != null && !EmailValidator.validate(email)
                                   ? 'Please enter a valid email.'
+                                  : null,
+                        ),
+                        const SizedBox(
+                          height: 25,
+                        ),
+                        TextFormField(
+                          controller: regNoController,
+                          textInputAction: TextInputAction.next,
+                          decoration:
+                              const InputDecoration(labelText: 'Reg Number'),
+                          obscureText: false,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          validator: (value) =>
+                              value != null && value.length < 5
+                                  ? 'Enter minimunm of 5 characters'
                                   : null,
                         ),
                         const SizedBox(

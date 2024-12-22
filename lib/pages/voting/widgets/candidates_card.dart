@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ulid/ulid.dart';
 import 'package:voter/pages/services/database_manager.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:voter/pages/services/verifyer.dart';
 
 class CandidateCard extends StatelessWidget {
   final String title;
@@ -21,13 +23,22 @@ class CandidateCard extends StatelessWidget {
   });
 
   String? authenticatedUserEmail;
+  String? authenticatedUserRegNo;
 
-  void getAuthenticatedUserEmail() {
+  void getAuthenticatedUserEmail() async {
     //
     final FirebaseAuth auth = FirebaseAuth.instance;
     var user = auth.currentUser;
 
     authenticatedUserEmail = user?.email;
+
+    DocumentSnapshot<Map<String, dynamic>> authenticatedUserData =
+        await FirebaseFirestore.instance
+            .collection("registered_users_data")
+            .doc(authenticatedUserEmail)
+            .get();
+
+    authenticatedUserRegNo = authenticatedUserData.data()!['regNo'];
   }
 
   @override
@@ -117,12 +128,23 @@ class CandidateCard extends StatelessWidget {
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          child: const Text("Cancel")),
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 2, 121, 218)),
+                          )),
+                      const Spacer(),
                       ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color.fromARGB(255, 241, 12, 12)),
                           onPressed: () {
                             castNewVote();
                           },
-                          child: const Text("Update Data"))
+                          child: const Text(
+                            "YES",
+                            style: TextStyle(color: Colors.white),
+                          ))
                     ],
                   ),
                 ]),
@@ -156,6 +178,40 @@ class CandidateCard extends StatelessWidget {
         ..showSnackBar(snackBar);
 
       Navigator.pop(context);
+    }
+
+    void beginVotingProcess() async {
+      //
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return const Center(child: CircularProgressIndicator());
+          });
+      //
+      var snackBar = const SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+            title: 'Not Yet Accredited!!!',
+            message:
+                'Sorry You are not yet an Accredited voter. Please visit Nacoss office for clarifications!!!.',
+            contentType: ContentType.failure),
+      );
+      //
+      var res = Verifier()
+          .checkIfVoterIsAccredited(authenticatedUserRegNo.toString());
+
+      if (await res) {
+        Navigator.pop(context);
+        showConfirmVotePopUp();
+      } else {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+        // Navigator.pop(context);
+      }
     }
 
     return Container(
@@ -235,7 +291,7 @@ class CandidateCard extends StatelessWidget {
                     child: votedStatus != null && votedStatus != "true"
                         ? ElevatedButton(
                             onPressed: () {
-                              showConfirmVotePopUp();
+                              beginVotingProcess();
                             },
                             child: const Text('Cast Vote'))
                         : ElevatedButton(

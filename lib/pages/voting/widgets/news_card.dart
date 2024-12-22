@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voter/pages/news_detail_page.dart';
 
 class NewsCard extends StatelessWidget {
   final String title;
@@ -94,13 +95,18 @@ class NewsCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.schedule,
-                        color: Colors.yellow,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 7),
-                      Text(cookTime),
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => NewsDetailPage(
+                                          newsTitle: title,
+                                          newsURL: rating,
+                                          thumbnailUrl: thumbnailUrl,
+                                        )));
+                          },
+                          child: const Text('See Details'))
                     ],
                   ),
                 )

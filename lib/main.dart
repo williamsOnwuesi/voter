@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         home: const StartPage(),
         routes: {
           '/voting': (context) => const VotingPage(),
-          '/home': (context) => const MyHomePage(title: 'Special Voting App'),
+          '/home': (context) => const MyHomePage(title: 'NACOSS Voting App'),
           '/settings': (context) => const SettingsPage(),
           '/admin': (context) => const AdminPage(),
           '/election_results': (context) => const ElectionResultsPage(),

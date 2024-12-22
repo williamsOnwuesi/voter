@@ -5,17 +5,19 @@ import 'dart:convert';
 
 class NewsApi {
   static Future<List<News>> getNews() async {
-    var uri = Uri.https('yummly2.p.rapidapi.com', '/feeds/list',
-        {"limit": "18", "start": "0", "tag": "list.recipe.popular"});
+    // var uri = Uri.https('yummly2.p.rapidapi.com', '/feeds/list',
+    //     {"limit": "18", "start": "0", "tag": "list.recipe.popular"});
 
-    final response = await http.get(uri, headers: {
-      "x-rapidapi-key": "fa13dbe4c5msh02ac0fc2e696d06p13efd7jsn2244cd2894e3",
-      "x-rapidapi-host": "yummly2.p.rapidapi.com",
-      "useQueryString": "true"
-    });
+    // final response = await http.get(uri, headers: {
+    //   "x-rapidapi-key": "fa13dbe4c5msh02ac0fc2e696d06p13efd7jsn2244cd2894e3",
+    //   "x-rapidapi-host": "yummly2.p.rapidapi.com",
+    //   "useQueryString": "true"
+    // });
 
-    Map data = jsonDecode(response.body);
-    List temp = [];
+    // print(response.toString());
+
+    // Map data = jsonDecode(response.body);
+    // List temp = [];
 
     //News Start
 
@@ -51,10 +53,10 @@ class NewsApi {
     //News End
     // print(data);
 
-    for (var i in data['feed']) {
-      // print(i['content']['details']);
-      temp.add(i['content']['details']);
-    }
+    // for (var i in data['feed']) {
+    //   // print(i['content']['details']);
+    //   temp.add(i['content']['details']);
+    // }
 
     return News.newsFromSnapshot(tempN);
     // return News.newsFromSnapshot(temp);
